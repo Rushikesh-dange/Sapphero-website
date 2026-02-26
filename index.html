@@ -1,1720 +1,972 @@
 <!doctype html>
 <html lang="en">
-
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Grand Menu</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <!-- fontawesome -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
-    <!-- stylesheet -->
-    <link rel="stylesheet" href="style.css">
+        :root {
+            --bg-color: #0d0f12;
+            --card-bg: #1a1d24;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #fbbf24;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <title>Menu</title>
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .hero-header {
+            padding: 60px 20px 30px;
+            text-align: center;
+        }
+
+        .hero-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .hero-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .filter-wrapper {
+            position: sticky;
+            top: 0;
+            background: rgba(13, 15, 18, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .category-filters {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 0 20px;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .category-filters::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid #334155;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent);
+            color: var(--text-main);
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        }
+
+        .menu-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .menu-item {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex; 
+            gap: 16px;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+            border-color: rgba(251, 191, 36, 0.2);
+        }
+
+        .item-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background-color: #333; /* Fallback if image fails */
+        }
+
+        .item-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+            gap: 10px;
+        }
+
+        .item-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .item-price {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .item-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .menu-container { grid-template-columns: 1fr; }
+            .hero-header h1 { font-size: 2.5rem; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center" id="heading" style="color: white;">Our Menu</h1>
-        <div class="underline mb-5"></div>
-        <div class="categories text-center">
-            <button type="button" class="btn btn-outline-warning mx-1" id="allBtn">All</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="breakfastBtn">Breakfast</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="lunchBtn">Lunch/Dinner</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="aptBtn">Oriental Appetizes</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="paneerBtn">Paneer</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="vegBtn">Vegetables</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="shakesBtn">Beverages</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="sweetsBtn">Sweets</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="southBtn">South Indian</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="bitsBtn">TIT-BITS</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="dalBtn">Dal Of Your Choice</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="pulaoBtn">Biryani And Pulao</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="breadBtn">Indian Breads</button>
-            <button type="button" class="btn btn-outline-warning mx-1" id="riceBtn">Oriental Rice & Noodles</button>
-        </div>
-        <div class="menu-items mt-5">
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4 col-sm-12">
-                        <img src="images/buffet_breakfast.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Buffet Breakfast</h5>
-                                <span class="price text-warning">Rs. 299</span>
-                            </div>
-                            <!-- <p class="card-text">I'm baby woke mlkshk wolf bitters live-edge blue bottle, hammock freegan copper mug whatever cold-pressed</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/paratha.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choices of Paratha</h5>
-                                <span class="price text-warning">Rs. 115</span>
-                            </div>
-                            <p class="card-text">Aloo, Gobi, Paneer & Mix</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/puri-bhaji.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Puri Bhaji</h5>
-                                <span class="price text-warning">Rs. 115</span>
-                            </div>
-                            <!-- <p class="card-text">ombucha chillwave fanny pack 3 wolf moon street art photo booth before they sold out organic viral.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/veg-upma.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Upma</h5>
-                                <span class="price text-warning">Rs. 95</span>
-                            </div>
-                            <!-- <p class="card-text">Shabby chic keffiyeh neutra snackwave pork belly shoreditch. Prism austin mlkshk truffaut,</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/poha.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Poha</h5>
-                                <span class="price text-warning">Rs.95</span>
-                            </div>
-                            <!-- <p class="card-text">franzen vegan pabst bicycle rights kickstarter pinterest meditation farm-to-table 90's pop-up</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/medu-vada.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Medu Vada</h5>
-                                <span class="price text-warning">Rs. 95</span>
-                            </div>
-                            <!-- <p class="card-text">Portland chicharrones ethical edison bulb, palo santo craft beer chia heirloom iPhone everyday</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/dosa-recipe.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Dosa</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <p class="card-text">Plain, Masala, Mysore & Cheese</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/toast.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Toast</h5>
-                                <span class="price text-warning">Rs. 75</span>
-                            </div>
-                            <p class="card-text">Served with Butter And Jam</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/veg-grilled-sandwich-recipe.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg. Sandwich</h5>
-                                <span class="price text-warning">Rs. 105</span>
-                            </div>
-                            <p class="card-text">Plain or Toasted</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/fresh_juice.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Seasonal Fresh Juice</h5>
-                                <span class="price text-warning">Rs. 95</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/canned-juice.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Canned Juice</h5>
-                                <span class="price text-warning">Rs. 75</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="breakfast" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/cereals.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Cereals</h5>
-                                <span class="price text-warning">Rs. 105</span>
-                            </div>
-                            <p class="card-text">Cornflakes, Chocos, Served with hot/cold milk</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="lunch/dinner" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/buffet-lunch.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Buffet Lunch/Dinner</h5>
-                                <span class="price text-warning">Rs. 455</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="lunch/dinner" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/shorba.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Shorba</h5>
-                                <span class="price text-warning">Rs. 105</span>
-                            </div>
-                            <p class="card-text">Zameen, Makai, Tomato</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="lunch/dinner" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/soup.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Soup</h5>
-                                <span class="price text-warning">Rs. 105</span>
-                            </div>
-                            <p class="card-text">Hot & Sour, Tomato, Manchow, Sweetcorn, Lemon Coriander, Cream of Mushroom, Minestrone</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="lunch/dinner" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/salad.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Salad</h5>
-                                <span class="price text-warning">Rs. 95</span>
-                            </div>
-                            <p class="card-text">Green, Tossed, Russian, Waldorf</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="lunch/dinner" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/chaat.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Chaat</h5>
-                                <span class="price text-warning">Rs. 125</span>
-                            </div>
-                            <p class="card-text">Aloo, Chana, Peanut</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="lunch/dinner" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/raita.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Raita</h5>
-                                <span class="price text-warning">Rs. 95</span>
-                            </div>
-                            <p class="card-text">Boondi, Mix, Pineapple, Plain Curd</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="lunch/dinner" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/papad.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Papad</h5>
-                                <span class="price text-warning">Rs. 35</span>
-                            </div>
-                            <p class="card-text">Roasted, Masala, Fried</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="lunch/dinner" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/kabab.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Indian Kababs</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <p class="card-text">Hara Bhara, Dahi, Shami</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="beverages" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/tea.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Tea</h5>
-                                <span class="price text-warning">Rs. 25</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="beverages" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/coffee.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Coffee</h5>
-                                <span class="price text-warning">Rs. 30</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="beverages" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/hot-milk.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Hot Milk</h5>
-                                <span class="price text-warning">Rs. 45</span>
-                            </div>
-                            <p class="card-text">Sweet, Plain</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="beverages" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/cold-coffee.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Cold Coffee</h5>
-                                <span class="price text-warning">Rs. 110</span>
-                            </div>
-                            <p class="card-text">Plain/with Ice-cream</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="beverages" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/butter-milk.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Butter Milk</h5>
-                                <span class="price text-warning">Rs. 60</span>
-                            </div>
-                            <p class="card-text">Masala or Plain</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="beverages" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/lassi.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Lassi</h5>
-                                <span class="price text-warning">Rs. 80</span>
-                            </div>
-                            <p class="card-text">Sweet/Salted</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="beverages" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/aerated-drinks.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Aerated Drinks</h5>
-                                <span class="price text-warning">Rs. 70</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="beverages" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/bottled-water.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Bottled Water</h5>
-                                <span class="price text-warning">Rs. 25</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="beverages" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/lime-water.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Fresh Lime Water</h5>
-                                <span class="price text-warning">Rs. 35</span>
-                            </div>
-                            <p class="card-text">Sweet/Salted</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="beverages" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/lime-soda.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Fresh Lime Soda</h5>
-                                <span class="price text-warning">Rs. 55</span>
-                            </div>
-                            <p class="card-text">Sweet/Salted</p>
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="Appetizes" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/crispy-corn.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Crispy Corn</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="Appetizest" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/veg-crispy.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg. Crispy</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="Appetizes" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/crispy-potato.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Crispy Chilli Potato</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="Appetizes" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/veg-manchurian.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg Manchurian</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="Appetizes" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/mushroom-chilli.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Mushroom Chilli Potato</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="Appetizes" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/baby-corn-chilli.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Baby Corn Chilli</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="Appetizes" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/chilli-mushroom.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Mushroom Chilli Dry</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="Appetizes" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/veg65.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg. 65</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="Appetizes" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/chilli-paneer.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Paneer Chilli</h5>
-                                <span class="price text-warning">Rs. 195</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="Appetizes" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/paneer-manchurian.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Paneer Manchurian</h5>
-                                <span class="price text-warning">Rs. 195</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="paneer" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/paneer-tikka-masala.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Paneer Tikka Masala</h5>
-                                <span class="price text-warning">Rs. 275</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="paneer" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/Paneer-Butter-Masala.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Paneer Butter Masala</h5>
-                                <span class="price text-warning">Rs. 275</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div><div class="card mb-3 col-md-6" id="paneer" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/paneer-lababdar.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Paneer Lababdar</h5>
-                                <span class="price text-warning">Rs. 275</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="paneer" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/paneer-methi-malai.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Paneer Methi Malai</h5>
-                                <span class="price text-warning">Rs. 275</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="paneer" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/adraki-dhaniya-paneer.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Adraki Daniya Paneer</h5>
-                                <span class="price text-warning">Rs. 275</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="paneer" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/matar-paneer.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Matar Paneer</h5>
-                                <span class="price text-warning">Rs. 275</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="paneer" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/kadai-paneer.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Paneer Kadai</h5>
-                                <span class="price text-warning">Rs. 275</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="paneer" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/paneer-handi.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Paneer Handi</h5>
-                                <span class="price text-warning">Rs. 275</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="veg" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/kadai-vegetables.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg. Kadai</h5>
-                                <span class="price text-warning">Rs. 245</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="veg" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/veg-handi.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg. Handi</h5>
-                                <span class="price text-warning">Rs. 245</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="veg" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/big_subz_do_pyaza.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Subz Do Pyaaza</h5>
-                                <span class="price text-warning">Rs. 245</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="veg" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/navaratan-korma.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Navratan Korma</h5>
-                                <span class="price text-warning">Rs. 245</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="veg" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/dum-aloo.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Dum Aloo Amritsari</h5>
-                                <span class="price text-warning">Rs. 245</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="veg" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/kumbh-curry.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Khumbh Curry</h5>
-                                <span class="price text-warning">Rs. 245</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="veg" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/mushroom-babycorn.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Matar Mashroom Baby Corn</h5>
-                                <span class="price text-warning">Rs. 245</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="veg" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/mushroom-do-pyaza.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Mushroom Do Pyaaza</h5>
-                                <span class="price text-warning">Rs. 245</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="veg" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/veg-taka-tak.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Sabz Taka Tin</h5>
-                                <span class="price text-warning">Rs. 245</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="veg" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/kadai-vegetables.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Sapphero Special Veg</h5>
-                                <span class="price text-warning">Rs. 325</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="sweets" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/gulab-jamun.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Gulab Jamun</h5>
-                                <span class="price text-warning">Rs. 95</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="sweets" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/ice-cream.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Ice Cream</h5>
-                                <span class="price text-warning">Rs. 95</span>
-                            </div>
-                            <p class="card-text">Vanilla, Chocolate or Strawberry</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="sweets" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/suji-halwa.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Suji Halwa</h5>
-                                <span class="price text-warning">Rs. 120</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="sweets" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/Dry_fruit_Halwa.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Dry Fruits Halwa</h5>
-                                <span class="price text-warning">Rs. 150</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="sweets" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/Vegan-Fruit-Custard.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Fruit Custard</h5>
-                                <span class="price text-warning">Rs. 120</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="sweets" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/shahi-tukda.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Shahi Tukda (4 pieces)</h5>
-                                <span class="price text-warning">Rs. 150</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="sweets" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/Seviyan-Kheer.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Kheer</h5>
-                                <span class="price text-warning">Rs. 100</span>
-                            </div>
-                            <p class="card-text">Keshari, Sevariya, Sabudana</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="south" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/plain-dosa.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Plain Dosa</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="south" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/masala-dosa.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Masala Dosa</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="south" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/rava-masala-dosa.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Rava Masala Dosa</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="south" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/mysore-dosa.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Mysore Dosa</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="south" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/idli.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Idli</h5>
-                                <span class="price text-warning">Rs. 95</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="south" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/medu-vada.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Medu Vada</h5>
-                                <span class="price text-warning">Rs. 115</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="south" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/uttapam.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Uttapam</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <p class="card-text">Onion Chilly & Tomato, Masala</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="south" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/curd-rice.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Curd Rice</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="south" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/Lemon-Rice.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Lemon Rice</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="dal" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/dal-fry.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Dal Fry</h5>
-                                <span class="price text-warning">Rs. 155</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="dal" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/Dal-Tadka.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Dal Tadka</h5>
-                                <span class="price text-warning">Rs. 155</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="dal" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/dal-makhni.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Dal Makhani</h5>
-                                <span class="price text-warning">Rs. 155</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="dal" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/lasooni-dal-tadka.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Dal Lasooni</h5>
-                                <span class="price text-warning">Rs. 155</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="dal" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/dal-palak.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Dal Palak</h5>
-                                <span class="price text-warning">Rs. 155</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="pulao" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/veg-biryani.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg Biryani</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="pulao" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/veg-pulao.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg Pulao</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="pulao" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/green-peas-pulao.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg Peas Pulao</h5>
-                                <span class="price text-warning">Rs. 175</span>
-                            </div>
-                            <!-- <p class="card-text">skateboard fam synth authentic semiotics. Live-edge lyft af, edison bulb yuccie crucifix microdosing.</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="pulao" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/steamed-rice.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Rice You Prefer</h5>
-                                <span class="price text-warning">Rs. 125</span>
-                            </div>
-                            <p class="card-text">Jeera/Steamed</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="bread" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/tawa-roti.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Tawa Roti</h5>
-                                <span class="price text-warning">Rs. 20</span>
-                            </div>
-                            <p class="card-text">Plain/Butter</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="bread" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/plain-paratha.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Plain Paratha</h5>
-                                <span class="price text-warning">Rs. 40</span>
-                            </div>
-                            <!-- <p class="card-text">Plain/Butter</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="bread" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/Aloo-Paratha.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Stuffed Paratha</h5>
-                                <span class="price text-warning">Rs. 115</span>
-                            </div>
-                            <p class="card-text">Aloo, Paneer or Mix</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="rice" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/hakka-noodles.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Hakka Noodles</h5>
-                                <span class="price text-warning">Rs. 195</span>
-                            </div>
-                            <!-- <p class="card-text">Plain/Butter</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="rice" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/chili-garlic-noodles.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Chilli Garlic Noodles</h5>
-                                <span class="price text-warning">Rs. 195</span>
-                            </div>
-                            <!-- <p class="card-text">Plain/Butter</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="rice" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/veg-fried-rice.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg Fried Rice</h5>
-                                <span class="price text-warning">Rs. 195</span>
-                            </div>
-                            <!-- <p class="card-text">Plain/Butter</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="rice" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/garlic-fried-rice.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Garlic Fried Rice</h5>
-                                <span class="price text-warning">Rs. 195</span>
-                            </div>
-                            <!-- <p class="card-text">Plain/Butter</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="rice" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/mushroom-rice.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Mushroom Rice</h5>
-                                <span class="price text-warning">Rs. 195</span>
-                            </div>
-                            <!-- <p class="card-text">Plain/Butter</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="rice" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/Schezwan-Fried-Rice.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Schezwan Fried Rice</h5>
-                                <span class="price text-warning">Rs. 195</span>
-                            </div>
-                            <!-- <p class="card-text">Plain/Butter</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="bits" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/pakoda.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Choice of Pakoda</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <p class="card-text">Onion, Bread or Mix Veg</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="bits" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/Veg-Cutlet.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg Cutlet</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">Onion, Bread or Mix Veg</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="bits" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/french-fries.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">French Fries</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">Onion, Bread or Mix Veg</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="bits" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/Masala-Peanuts.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Peanut Masala/Fry</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">Onion, Bread or Mix Veg</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="bits" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/veg-sandwich.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Veg Sandwich</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">Onion, Bread or Mix Veg</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="bits" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/Aloo-chaat.jpg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Aloo Chaat</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">Onion, Bread or Mix Veg</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="bits" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/chana-chaat.jpeg" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Chana Chaat / Roast</h5>
-                                <span class="price text-warning">Rs. 135</span>
-                            </div>
-                            <!-- <p class="card-text">Onion, Bread or Mix Veg</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="card mb-3 col-md-6" id="bits" style="max-width: 660px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="images/paneer-pakora.webp" class="img-fluid rounded-start border border-warning border-2" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <!-- <h5 class="card-title d-inline">Card title <span class="price">$15.99</span></h5> -->
-                            <div class="card-title">
-                                <h5 class="d-inline">Paneer Pakoda</h5>
-                                <span class="price text-warning">Rs. 150</span>
-                            </div>
-                            <!-- <p class="card-text">Onion, Bread or Mix Veg</p> -->
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+    <header class="hero-header">
+        <h1>Our Menu</h1>
+        <p>A culinary journey crafted with passion.</p>
+    </header>
+
+    <div class="filter-wrapper">
+        <div class="category-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="breakfast">Breakfast</button>
+            <button class="filter-btn" data-filter="lunch">Lunch & Dinner</button>
+            <button class="filter-btn" data-filter="appetizers">Oriental Appetizers</button>
+            <button class="filter-btn" data-filter="paneer">Paneer</button>
+            <button class="filter-btn" data-filter="veg">Vegetables</button>
+            <button class="filter-btn" data-filter="dal">Dal</button>
+            <button class="filter-btn" data-filter="bread">Breads</button>
+            <button class="filter-btn" data-filter="pulao">Biryani & Pulao</button>
+            <button class="filter-btn" data-filter="rice">Rice & Noodles</button>
+            <button class="filter-btn" data-filter="south">South Indian</button>
+            <button class="filter-btn" data-filter="sweets">Sweets</button>
+            <button class="filter-btn" data-filter="bits">Tit-Bits</button>
+            <button class="filter-btn" data-filter="beverages">Beverages</button>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
-    <script src="script.js"></script>
+    <main class="menu-container" id="menu-container">
+        
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/buffet_breakfast.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Buffet Breakfast</h3><span class="item-price">₹299</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/paratha.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choices of Paratha</h3><span class="item-price">₹115</span></div>
+                <p class="item-desc">Aloo, Gobi, Paneer & Mix</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/puri-bhaji.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Puri Bhaji</h3><span class="item-price">₹115</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/veg-upma.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Upma</h3><span class="item-price">₹95</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/poha.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Poha</h3><span class="item-price">₹95</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/medu-vada.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Medu Vada</h3><span class="item-price">₹95</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/dosa-recipe.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Dosa</h3><span class="item-price">₹135</span></div>
+                <p class="item-desc">Plain, Masala, Mysore & Cheese</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/toast.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Toast</h3><span class="item-price">₹75</span></div>
+                <p class="item-desc">Served with Butter And Jam</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/veg-grilled-sandwich-recipe.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Veg. Sandwich</h3><span class="item-price">₹105</span></div>
+                <p class="item-desc">Plain or Toasted</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/fresh_juice.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Seasonal Fresh Juice</h3><span class="item-price">₹95</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/canned-juice.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Canned Juice</h3><span class="item-price">₹75</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="breakfast">
+            <div class="item-img"><img src="images/cereals.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Cereals</h3><span class="item-price">₹105</span></div>
+                <p class="item-desc">Cornflakes, Chocos, hot/cold milk</p>
+            </div>
+        </div>
 
+        <div class="menu-item" data-category="lunch">
+            <div class="item-img"><img src="images/buffet-lunch.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Buffet Lunch/Dinner</h3><span class="item-price">₹455</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="lunch">
+            <div class="item-img"><img src="images/shorba.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Shorba</h3><span class="item-price">₹105</span></div>
+                <p class="item-desc">Zameen, Makai, Tomato</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="lunch">
+            <div class="item-img"><img src="images/soup.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Soup</h3><span class="item-price">₹105</span></div>
+                <p class="item-desc">Hot & Sour, Tomato, Manchow, Minestrone...</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="lunch">
+            <div class="item-img"><img src="images/salad.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Salad</h3><span class="item-price">₹95</span></div>
+                <p class="item-desc">Green, Tossed, Russian, Waldorf</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="lunch">
+            <div class="item-img"><img src="images/chaat.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Chaat</h3><span class="item-price">₹125</span></div>
+                <p class="item-desc">Aloo, Chana, Peanut</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="lunch">
+            <div class="item-img"><img src="images/raita.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Raita</h3><span class="item-price">₹95</span></div>
+                <p class="item-desc">Boondi, Mix, Pineapple, Plain Curd</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="lunch">
+            <div class="item-img"><img src="images/papad.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Papad</h3><span class="item-price">₹35</span></div>
+                <p class="item-desc">Roasted, Masala, Fried</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="lunch">
+            <div class="item-img"><img src="images/kabab.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Indian Kababs</h3><span class="item-price">₹175</span></div>
+                <p class="item-desc">Hara Bhara, Dahi, Shami</p>
+            </div>
+        </div>
 
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/crispy-corn.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Crispy Corn</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/veg-crispy.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Veg. Crispy</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/veg-manchurian.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Veg Manchurian</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/baby-corn-chilli.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Baby Corn Chilli</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/chilli-mushroom.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Mushroom Chilli Dry</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/veg65.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Veg. 65</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/chilli-paneer.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Paneer Chilli</h3><span class="item-price">₹195</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/paneer-manchurian.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Paneer Manchurian</h3><span class="item-price">₹195</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/Dragon Paneer.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Dragon Paneer</h3><span class="item-price">₹195</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/Comphou Paneer.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Comphou Paneer</h3><span class="item-price">₹195</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/Baby Corn Salt & Pepper.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Baby Corn Salt & Pepper</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/Babycorn Manchurian.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Babycorn Manchurian</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/Mushroom Salt & Pepper.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Mushroom Salt & Pepper</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/Gobi 65.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Gobi 65</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/Gobi Manchurian.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Gobi Manchurian</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="appetizers">
+            <div class="item-img"><img src="images/Gobi Chilli.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Gobi Chilli</h3><span class="item-price">₹175</span></div>
+            </div>
+        </div>
+
+        <div class="menu-item" data-category="paneer">
+            <div class="item-img"><img src="images/paneer-tikka-masala.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Paneer Tikka Masala</h3><span class="item-price">₹275</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="paneer">
+            <div class="item-img"><img src="images/Paneer-Butter-Masala.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Paneer Butter Masala</h3><span class="item-price">₹275</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="paneer">
+            <div class="item-img"><img src="images/paneer-lababdar.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Paneer Lababdar</h3><span class="item-price">₹275</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="paneer">
+            <div class="item-img"><img src="images/paneer-methi-malai.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Paneer Methi Malai</h3><span class="item-price">₹275</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="paneer">
+            <div class="item-img"><img src="images/adraki-dhaniya-paneer.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Adraki Daniya Paneer</h3><span class="item-price">₹275</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="paneer">
+            <div class="item-img"><img src="images/matar-paneer.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Matar Paneer</h3><span class="item-price">₹275</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="paneer">
+            <div class="item-img"><img src="images/kadai-paneer.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Paneer Kadai</h3><span class="item-price">₹275</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="paneer">
+            <div class="item-img"><img src="images/paneer-handi.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Paneer Handi</h3><span class="item-price">₹275</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="paneer">
+            <div class="item-img"><img src="images/Paneer Bhurji.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Paneer Bhurji</h3><span class="item-price">₹275</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="paneer">
+            <div class="item-img"><img src="images/Chef Special Paneer Kundan Kaliyan.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Chef Special Paneer Kundan Kaliyan</h3><span class="item-price">₹325</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="paneer">
+            <div class="item-img"><img src="images/Choice of Paneer Tikka.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Paneer Tikka</h3><span class="item-price">₹325</span></div>
+                <p class="item-desc">Haryali, Achari, Malai, Ajwaini, Tandoori</p>
+            </div>
+        </div>
+
+        <div class="menu-item" data-category="veg">
+            <div class="item-img"><img src="images/kadai-vegetables.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Veg. Kadai</h3><span class="item-price">₹245</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="veg">
+            <div class="item-img"><img src="images/veg-handi.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Veg. Handi</h3><span class="item-price">₹245</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="veg">
+            <div class="item-img"><img src="images/big_subz_do_pyaza.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Subz Do Pyaaza</h3><span class="item-price">₹245</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="veg">
+            <div class="item-img"><img src="images/navaratan-korma.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Navratan Korma</h3><span class="item-price">₹245</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="veg">
+            <div class="item-img"><img src="images/dum-aloo.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Dum Aloo Amritsari</h3><span class="item-price">₹245</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="veg">
+            <div class="item-img"><img src="images/kumbh-curry.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Khumbh Curry</h3><span class="item-price">₹245</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="veg">
+            <div class="item-img"><img src="images/mushroom-babycorn.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Matar Mashroom Baby Corn</h3><span class="item-price">₹245</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="veg">
+            <div class="item-img"><img src="images/mushroom-do-pyaza.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Mushroom Do Pyaaza</h3><span class="item-price">₹245</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="veg">
+            <div class="item-img"><img src="images/veg-taka-tak.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Sabz Taka Tin</h3><span class="item-price">₹245</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="veg">
+            <div class="item-img"><img src="images/kadai-vegetables.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Sapphero Special Veg</h3><span class="item-price">₹325</span></div>
+            </div>
+        </div>
+
+        <div class="menu-item" data-category="dal">
+            <div class="item-img"><img src="images/dal-fry.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Dal Fry</h3><span class="item-price">₹155</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="dal">
+            <div class="item-img"><img src="images/Dal-Tadka.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Dal Tadka</h3><span class="item-price">₹155</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="dal">
+            <div class="item-img"><img src="images/dal-makhni.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Dal Makhani</h3><span class="item-price">₹155</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="dal">
+            <div class="item-img"><img src="images/lasooni-dal-tadka.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Dal Lasooni</h3><span class="item-price">₹155</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="dal">
+            <div class="item-img"><img src="images/dal-palak.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Dal Palak</h3><span class="item-price">₹155</span></div>
+            </div>
+        </div>
+
+        <div class="menu-item" data-category="pulao">
+            <div class="item-img"><img src="images/veg-biryani.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Veg Biryani</h3><span class="item-price">₹175</span></div>
+                <p class="item-desc">Veg Andra, Nawabi Subz, Hyd</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="pulao">
+            <div class="item-img"><img src="images/veg-pulao.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Pulao</h3><span class="item-price">₹175</span></div>
+                <p class="item-desc">Veg Pulao, Kaju Mutter, Jeera Peas, Kashmiri</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="pulao">
+            <div class="item-img"><img src="images/steamed-rice.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Rice You Prefer</h3><span class="item-price">₹125</span></div>
+                <p class="item-desc">Jeera/Steamed</p>
+            </div>
+        </div>
+
+        <div class="menu-item" data-category="bread">
+            <div class="item-img"><img src="images/tawa-roti.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Tawa Roti</h3><span class="item-price">₹20</span></div>
+                <p class="item-desc">Plain/Butter</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bread">
+            <div class="item-img"><img src="images/Tandoori Roti.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Tandoori Roti</h3><span class="item-price">₹40</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bread">
+            <div class="item-img"><img src="images/Missi Roti.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Missi Roti</h3><span class="item-price">₹60</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bread">
+            <div class="item-img"><img src="images/Naan.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Naan</h3><span class="item-price">₹60</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bread">
+            <div class="item-img"><img src="images/Butter NanButter Nan.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Butter Nan</h3><span class="item-price">₹60</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bread">
+            <div class="item-img"><img src="images/plain-paratha.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Plain Paratha</h3><span class="item-price">₹40</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bread">
+            <div class="item-img"><img src="images/Laccha Paratha.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Laccha Paratha</h3><span class="item-price">₹60</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bread">
+            <div class="item-img"><img src="images/Pudina Paratha.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Pudina Paratha</h3><span class="item-price">₹60</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bread">
+            <div class="item-img"><img src="images/Aloo-Paratha.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Stuffed Paratha</h3><span class="item-price">₹115</span></div>
+                <p class="item-desc">Aloo, Paneer or Mix</p>
+            </div>
+        </div>
+
+        <div class="menu-item" data-category="rice">
+            <div class="item-img"><img src="images/hakka-noodles.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Hakka Noodles</h3><span class="item-price">₹195</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="rice">
+            <div class="item-img"><img src="images/chili-garlic-noodles.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Chilli Garlic Noodles</h3><span class="item-price">₹195</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="rice">
+            <div class="item-img"><img src="images/veg-fried-rice.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Veg Fried Rice</h3><span class="item-price">₹195</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="rice">
+            <div class="item-img"><img src="images/garlic-fried-rice.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Garlic Fried Rice</h3><span class="item-price">₹195</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="rice">
+            <div class="item-img"><img src="images/mushroom-rice.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Mushroom Rice</h3><span class="item-price">₹195</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="rice">
+            <div class="item-img"><img src="images/Schezwan-Fried-Rice.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Schezwan Fried Rice</h3><span class="item-price">₹195</span></div>
+            </div>
+        </div>
+
+        <div class="menu-item" data-category="south">
+            <div class="item-img"><img src="images/plain-dosa.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Plain Dosa</h3><span class="item-price">₹135</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="south">
+            <div class="item-img"><img src="images/masala-dosa.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Masala Dosa</h3><span class="item-price">₹135</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="south">
+            <div class="item-img"><img src="images/mysore-dosa.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Mysore Dosa</h3><span class="item-price">₹135</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="south">
+            <div class="item-img"><img src="images/idli.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Idli</h3><span class="item-price">₹95</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="south">
+            <div class="item-img"><img src="images/medu-vada.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Medu Vada</h3><span class="item-price">₹115</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="south">
+            <div class="item-img"><img src="images/uttapam.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Uttapam</h3><span class="item-price">₹135</span></div>
+                <p class="item-desc">Onion Chilly & Tomato, Masala</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="south">
+            <div class="item-img"><img src="images/curd-rice.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Curd Rice</h3><span class="item-price">₹135</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="south">
+            <div class="item-img"><img src="images/Lemon-Rice.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Lemon Rice</h3><span class="item-price">₹135</span></div>
+            </div>
+        </div>
+
+        <div class="menu-item" data-category="sweets">
+            <div class="item-img"><img src="images/gulab-jamun.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Gulab Jamun</h3><span class="item-price">₹95</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="sweets">
+            <div class="item-img"><img src="images/ice-cream.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Ice Cream</h3><span class="item-price">₹95</span></div>
+                <p class="item-desc">Vanilla, Chocolate or Strawberry</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="sweets">
+            <div class="item-img"><img src="images/suji-halwa.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Suji Halwa</h3><span class="item-price">₹120</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="sweets">
+            <div class="item-img"><img src="images/Dry_fruit_Halwa.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Dry Fruits Halwa</h3><span class="item-price">₹150</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="sweets">
+            <div class="item-img"><img src="images/shahi-tukda.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Shahi Tukda (4 pieces)</h3><span class="item-price">₹150</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="sweets">
+            <div class="item-img"><img src="images/Seviyan-Kheer.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Kheer</h3><span class="item-price">₹100</span></div>
+                <p class="item-desc">Keshari, Sevariya, Sabudana</p>
+            </div>
+        </div>
+
+        <div class="menu-item" data-category="bits">
+            <div class="item-img"><img src="images/pakoda.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Choice of Pakoda</h3><span class="item-price">₹135</span></div>
+                <p class="item-desc">Onion, Bread or Mix Veg</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bits">
+            <div class="item-img"><img src="images/Veg-Cutlet.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Veg Cutlet</h3><span class="item-price">₹135</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bits">
+            <div class="item-img"><img src="images/french-fries.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">French Fries</h3><span class="item-price">₹135</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bits">
+            <div class="item-img"><img src="images/Masala-Peanuts.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Peanut Masala/Fry</h3><span class="item-price">₹135</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bits">
+            <div class="item-img"><img src="images/veg-sandwich.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Veg Sandwich</h3><span class="item-price">₹135</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bits">
+            <div class="item-img"><img src="images/Aloo-chaat.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Aloo Chaat</h3><span class="item-price">₹135</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bits">
+            <div class="item-img"><img src="images/chana-chaat.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Chana Chaat / Roast</h3><span class="item-price">₹135</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="bits">
+            <div class="item-img"><img src="images/paneer-pakora.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Paneer Pakoda</h3><span class="item-price">₹150</span></div>
+            </div>
+        </div>
+
+        <div class="menu-item" data-category="beverages">
+            <div class="item-img"><img src="images/tea.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Tea</h3><span class="item-price">₹25</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="beverages">
+            <div class="item-img"><img src="images/coffee.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Coffee</h3><span class="item-price">₹30</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="beverages">
+            <div class="item-img"><img src="images/hot-milk.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Hot Milk</h3><span class="item-price">₹45</span></div>
+                <p class="item-desc">Sweet, Plain</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="beverages">
+            <div class="item-img"><img src="images/cold-coffee.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Cold Coffee</h3><span class="item-price">₹110</span></div>
+                <p class="item-desc">Plain/with Ice-cream</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="beverages">
+            <div class="item-img"><img src="images/butter-milk.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Butter Milk</h3><span class="item-price">₹60</span></div>
+                <p class="item-desc">Masala or Plain</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="beverages">
+            <div class="item-img"><img src="images/lassi.webp" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Lassi</h3><span class="item-price">₹80</span></div>
+                <p class="item-desc">Sweet/Salted</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="beverages">
+            <div class="item-img"><img src="images/aerated-drinks.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Aerated Drinks</h3><span class="item-price">₹70</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="beverages">
+            <div class="item-img"><img src="images/bottled-water.jpg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Bottled Water</h3><span class="item-price">₹25</span></div>
+            </div>
+        </div>
+        <div class="menu-item" data-category="beverages">
+            <div class="item-img"><img src="images/lime-water.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Fresh Lime Water</h3><span class="item-price">₹35</span></div>
+                <p class="item-desc">Sweet/Salted</p>
+            </div>
+        </div>
+        <div class="menu-item" data-category="beverages">
+            <div class="item-img"><img src="images/lime-soda.jpeg" alt="Food"></div>
+            <div class="item-details">
+                <div class="item-header"><h3 class="item-title">Fresh Lime Soda</h3><span class="item-price">₹55</span></div>
+                <p class="item-desc">Sweet/Salted</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const menuItems = document.querySelectorAll('.menu-item');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    
+                    // 1. Remove active state from all buttons
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    
+                    // 2. Add active state to the clicked button
+                    this.classList.add('active');
+
+                    // 3. Get the category to filter by
+                    const targetCategory = this.getAttribute('data-filter');
+
+                    // 4. Show/Hide items
+                    menuItems.forEach(item => {
+                        const itemCategory = item.getAttribute('data-category');
+                        
+                        if (targetCategory === 'all' || itemCategory === targetCategory) {
+                            // Show the item using flex to keep the UI layout
+                            item.style.display = 'flex'; 
+                            
+                            // Restart the fade-in animation
+                            item.style.animation = 'none';
+                            void item.offsetWidth; // This forces the browser to redraw
+                            item.style.animation = 'fadeIn 0.5s ease forwards';
+                        } else {
+                            // Hide the item
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 </body>
-
 </html>
